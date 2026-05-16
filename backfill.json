@@ -1,0 +1,139 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.1.0",
+    "title": "Backfill API",
+    "description": "API for sending historical metric time series (MTS) data points to Splunk Observability Cloud, overwriting any existing data points for the same time period.\n\n## Requirements\n\n* You must have an organization access token with the API permission or a session token to use the API.\n* You have to have the Splunk Observability Cloud admin or power role to use the `POST /backfill` operation.\n",
+    "x-description": "API for sending historical metric time series (MTS) data points to Splunk Observability Cloud, overwriting any existing data points for the same time period.\n\n## Requirements\n\n* You must have an organization access token with the API permission or a session token to use the API.\n* You have to have the Splunk Observability Cloud admin or power role to use the `POST /backfill` operation.\n",
+    "x-update-date": "* 2019-06-07\n* 2019-11-21\n* 2021-04-13\n* 2023-10-03\n",
+    "x-version-info": "\n* 2019-06-07: 3.1.0: DOCS-483: API docs - Revised Access Token limitations\ndocumentation\n  Updated X-SF-TOKEN description\n* 2019-11-21: 3.2.0: DOCS-170: Timestamps, in milliseconds, are mislabeled\nas integers/int32\n\n* 2021-04-13: 3.3.0: DOCS-2250: Developer docs - Update description of API\ntokens for o11y GA\n\n* 2022-05-31: 3.4.0: DOCS-4040: Backfill API reference code example is\nmissing required query params\n\n* 2023-10-03: 1.1.0: DOCS-5706: Dev docs: Update Backfill endpoint for RBAC framework\n"
+  },
+  "servers": [
+    {
+      "url": "https://backfill.{REALM}.observability.splunkcloud.com/v1",
+      "description": "Endpoint URL\n",
+      "x-description": "Splunk Observability Cloud API endpoint.\n\n\nReplace `{REALM}` with the name of your realm. For example, if your realm\nis `eu0`, use\n\n`https://backfill.eu0.observability.splunkcloud.com/v1`.\n\n\nTo find your realm, go to your profile page in the user interface.\n\n\nIf you don't include a realm and use `https://backfill.observability.splunkcloud.com/v1`,\n\nthe PI interprets the endpoint as pointing to the `us0` realm.\n"
+    }
+  ],
+  "paths": {
+    "/backfill": {
+      "post": {
+        "summary": "Sends historical metric time series (MTS) data points to Splunk Observability Cloud",
+        "tags": [
+          "Backfill MTS"
+        ],
+        "description": "Sends historical metric time series (MTS) data points to Splunk Observability Cloud, overwriting any\nexisting data points for the same time period.\n",
+        "x-description": "Sends historical metric time series (MTS) data points to Splunk Observability Cloud, overwriting any\nexisting data points for the same time period. Be aware of the following when you use `/backfill`:\n\n  * A single call to `/backfill` can only refer to a single MTS\n    specified by its metric type, metric name, and dimensions.\n  * Use the API in bulk mode. It's designed to accept thousands of\n    data points in each call, such as 1 hour of points with a resolution\n    of one second or one day of points with a resolution of one minute.\n  * Timestamps for each data points must be monotonically ascending.\n  * A single call to `/backfill` must contain one or more hour-long \n    groups of data points, with each hour starting one millisecond after\n    the top of the hour and ending exactly at the top of the following\n    hour.\n  * Avoid large gaps in the data, because the provided data replaces\n    all of the data in the equivalent time period of existing data. For\n    example, if you have one hundred data points for an MTS over one\n    hour, and you backfill with 20 data points for the same MTS over the\n    same hour, you're left with 20 data points.\n\n  Note: `/backfill` doesn't support the built-in `sf_hires` dimension\n  that marks data points as high resolution.\n",
+        "operationId": "Backfill MTS",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "Always `application/json'.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "application/json"
+          },
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Access token (org token) with `authScope` set to `INGEST`\n",
+            "x-description": "Access token (org token) with `authScope` set to `INGEST`\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "x9Xxxxxx9XXXXxxxxX9XxX"
+          },
+          {
+            "name": "orgid",
+            "in": "query",
+            "description": "ID of the receiving organization.\n",
+            "x-description": "The ID for the organization that should receive\nthe incoming data.\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "XxXXX99XXXX"
+          },
+          {
+            "name": "metric_type",
+            "in": "query",
+            "description": "Type of metric: `gauge`, `counter`, or `cumulative_counter`.\n",
+            "x-description": "The metric type for the metric you're backfilling. Allowed values\nare `gauge`, `counter`, and `cumulative_counter`. To learn more, refer to the\n[Metric types](https://docs.splunk.com/Observability/metrics-and-metadata/metric-types.html#nav-Metric-types) section in the user documentation.\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "gauge",
+                "counter",
+                "cumulative_counter"
+              ]
+            },
+            "example": "gauge"
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "description": "Metric name in the MTS.\n",
+            "x-description": "For backfilled MTS, name of metric\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "demo.trans.count"
+          },
+          {
+            "name": "sfxdim_<dimension_name>",
+            "in": "query",
+            "description": "The dimensions in the MTS you're backfilling. One parameter per\nname.\n",
+            "x-description": "Specifies the dimensions for the MTS you're backfilling. Use the dimension\nname and value for each dimension, up to the limit of 36 dimensions.\n\nFor example, if you want to specify `sfxdim_demo_datacenter:Paris` as one\ndimension and `sfxdim_demo_host:server1` as another dimension, use the following\nin your URL: `sfxdim_demo_datacenter:Paris&sfxdim_demo_host:server1`\n\nYou must specify all the dimensions associated with the\nMTS. If you don't, the backfill creates a new MTS based on the\ndimensions you specify.\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "sfxdim_demo_datacenter:Paris&sfxdim_demo_host:server1"
+          }
+        ],
+        "requestBody": {
+          "description": "Request body\n",
+          "x-description": "Backfill request, containing a stream of JSON objects separated by\nwhitespace. The request body schema describes the format of each object.\n",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "timestamp",
+                  "value"
+                ],
+                "properties": {
+                  "timestamp": {
+                    "description": "data points timestamp\n",
+                    "x-description": "Timestamp of the historical data points, expressed in\n*nix time in milliseconds. The values of `timestamp` must be monotonically\nascending.\n",
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "value": {
+                    "description": "data points value\n",
+                    "x-description": "The metric value, as an integer or floating-point number.\n",
+                    "type": "number"
+                  }
+                },
+                "example": {
+                  "timestamp": 205344000000,
+                  "value": 400
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success\n",
+            "x-description": "Successful backfill request. The API doesn't return headers or a\nresponse body.\n"
+          }
+        }
+      }
+    }
+  }
+}

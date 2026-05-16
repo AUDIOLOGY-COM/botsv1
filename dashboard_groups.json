@@ -1,0 +1,1256 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "3.5.0",
+    "title": "Dashboard groups API",
+    "x-update-date": "* 2019-06-05: 3.1.0 \n* 2019-06-07: 3.2.0 \n* 2019-06-12: 3.3.0 \n* 2019-07-12: 3.3.2\n* 2019-11-26: 3.5.0\n* 2020-12-15: 3.6.0\n",
+    "x-version-info": "* 2019-05-13\n* 2019-06-05 DOCS-483: Updates for corrected authentication token \n  requirements \n* 2019-06-07: Simplified description of X-SF-TOKEN \n* 2019-06-12: SQUID-837: null and blank values used for filterOverride \n* 2019-07-12: SQUID-826: Improved error reporting\n* 2019-07-18: SQUID-826 renamed to DOCS-712\n* 2019-11-26: Changes for DOCS-170 and DOCS-172\n* 2020-04-24: 3.5.0: DOCS-1333: Developer docs - Mark the old Groups and Detectors to Teams linkage as deprecated\n* 2020-12-15: 3.6.0: DOCS-1656: Developer Docs: Revert Dashboard Group/Detector to Teams linking to old style\n  (undo of 3.5.0)\n",
+    "description": "API for creating a new dashboard group, retrieving the properties of one or more dashboard groups, updating the properties of a single dashboard group, making a clone of a dashboard to a group, adding a mirrored dashboard to a group, and deleting a dashboard group.\n \n## Requirements\n\n  * You must have an organization access token with the API permission or a session token to use the API.\n  * You must have the Splunk Observability Cloud admin or power role to use the `POST /dashboardgroup` `POST /dashboardgroup/{id}/dashboard`, `PUT /dashboardgroup/{id}`, and `DELETE /dashboardgroup/{id}` endpoints.\n  * You must have the Splunk Observability Cloud admin, power, or read_only role to use the `GET /dashboardgroup` and `GET /dashboardgroup/{id}` endpoints.\n",
+    "x-description": "Dashboard groups let you collect dashboards with common characteristics in one place in the UI, so you can view them together or in sequence.\n\nThe dashboard groups API lets you do the following:\n\n  * Create a new dashboard group: POST `/dashboardgroup`\n  * Retrieve the properties of one or more dashboard groups, using a\n    query encoded on the endpoint URL: GET `/dashboardgroup`\n  * Retrieve the properties of a single dashboard group specified by its\n    ID: GET `/dashboardgroup/{id}`\n  * Update the properties of a single dashboard group specified in the\n    `{id}` path parameter: PUT `/dashboardgroup/{id}`\n  * Make a deep copy, or clone, of the dashboard specified in the request body\n    to the group specified in the `{id}` path parameter:\n    POST `dashboardgroup/{id}/dashboard`\n  * Add a mirrored dashboard to a group: POST `/dashboardgroup/{id}`\n  * Delete the dashboard group specified in the `{id}` path parameter:\n    DELETE `/dashboardgroup/{id}`\n\nDashboard groups have options and functionality that depend on the\navailability of the mirrored dashboard feature in your organization. Read\nthe topic [Organize Charts Using Dashboards](https://dev.splunk.com/observability/docs/chartsdashboards/dashboards_overview)\nbefore using the Dashboard Groups API.\n\nIf the write permissions feature is available in your organization, you need\nto ensure you have write permissions for the following dashboard group\noperations:\n\n  * Adding dashboards to the group, including mirrored dashboards\n  * Rearranging the tab order of the group's dashboards in the UI\n  * Renaming or deleting the group\n  * Managing links between the group and teams\n\nTo make changes to a dashboard in the group or charts in a group's\ndashboard, you need write permission for the dashboard.\n\nTo learn more, see the topic\n[Manage permissions for detectors, dashboard groups, and dashboards](https://help.splunk.com/en?resourceId=data-visualization_dashboards_dashboard-manage-permissions)\nin the user documentation.\n\n## Requirements\n\n  * You must have an organization access token with the API permission or a session token to use the API.\n  * You must have the Splunk Observability Cloud admin or power role to use the `POST /dashboardgroup` `POST /dashboardgroup/{id}/dashboard`, `PUT /dashboardgroup/{id}`, and `DELETE /dashboardgroup/{id}` endpoints.\n  * You must have the Splunk Observability Cloud admin, power, or read_only role to use the `GET /dashboardgroup` and `GET /dashboardgroup/{id}` endpoints.\n"
+  },
+  "servers": [
+    {
+      "url": "https://api.{REALM}.observability.splunkcloud.com/v2",
+      "description": "Endpoint URL for Dashboard Groups API\n",
+      "x-description": "Splunk Observability Cloud API endpoint\n\nReplace `{REALM}` with the name of your realm.\nFor example, if your realm is `eu0`, use `https://api.eu0.observability.splunkcloud.com/v2`.\n\nTo find your realm, go to your profile page in the user interface.\n\nIf you don't include a realm and use `https://api.observability.splunkcloud.com/v2`,\nthe API interprets the endpoint as pointing to the `us0` realm.\n"
+    }
+  ],
+  "paths": {
+    "/dashboardgroup": {
+      "post": {
+        "tags": [
+          "Create Single Dashboard Group"
+        ],
+        "summary": "Creates a dashboard group",
+        "description": "Creates a dashboard group\n",
+        "x-description": "Creates a dashboard group using the properties specified in the request \nbody. If your organization has the write permissions feature\nenabled, you can use the `authorizedWriters` property to specify the\nusers and teams who have permission to edit or delete the group or its\ndashboards.\n",
+        "operationId": "Create Single Dashboard Group",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the request body. Always  `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token\n",
+            "x-description": "Authentication token\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "New dashboard group properties\n",
+          "x-description": "Properties that specify a new dashboard group\n\nIf you don't specify dashboards to include in this new group, the\nsystem creates a new dashboard and assigns it to this group.\n",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "authorizedWriters": {
+                    "$ref": "#/components/schemas/DashboardgroupAuthorizedWriters"
+                  },
+                  "dashboards": {
+                    "$ref": "#/components/schemas/DashboardgroupDashboards"
+                  },
+                  "dashboardConfigs": {
+                    "$ref": "#/components/schemas/DashboardConfigs"
+                  },
+                  "description": {
+                    "$ref": "#/components/schemas/DashboardgroupDescription"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/DashboardgroupName"
+                  },
+                  "teams": {
+                    "$ref": "#/components/schemas/DashboardgroupTeams"
+                  },
+                  "permissions": {
+                    "$ref": "#/components/schemas/DashboardgroupPermissions"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success\n",
+            "x-description": "Success\n",
+            "headers": {
+              "Content-Type": {
+                "description": "`\"application/json\"`\n",
+                "x-description": "Format of the response body. Always  `\"application/json\"`.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authorizedWriters": {
+                      "$ref": "#/components/schemas/DashboardgroupAuthorizedWriters"
+                    },
+                    "created": {
+                      "$ref": "#/components/schemas/DashboardgroupCreated"
+                    },
+                    "creator": {
+                      "$ref": "#/components/schemas/DashboardgroupCreator"
+                    },
+                    "dashboards": {
+                      "$ref": "#/components/schemas/DashboardgroupDashboards"
+                    },
+                    "dashboardConfigs": {
+                      "$ref": "#/components/schemas/DashboardConfigs"
+                    },
+                    "description": {
+                      "$ref": "#/components/schemas/DashboardgroupDescription"
+                    },
+                    "id": {
+                      "$ref": "#/components/schemas/DashboardgroupId"
+                    },
+                    "lastUpdated": {
+                      "$ref": "#/components/schemas/DashboardgroupLastUpdated"
+                    },
+                    "lastUpdatedBy": {
+                      "$ref": "#/components/schemas/DashboardgroupLastUpdatedBy"
+                    },
+                    "name": {
+                      "$ref": "#/components/schemas/DashboardgroupName"
+                    },
+                    "teams": {
+                      "$ref": "#/components/schemas/DashboardgroupTeams"
+                    },
+                    "permissions": {
+                      "$ref": "#/components/schemas/DashboardgroupPermissions"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request\n",
+            "x-description": "The request is invalid, because your request body has one or more of\nthe following generic problems:\n\n* You specified the array property `authorizedWriters`, but\n  an element of the array is an invalid user ID.\n* You specified the array property `authorizedWriters`, but\n  an element of the array is an invalid team ID.\n* You specified the array property `dashboards`, but an\n  element of the array is a dashboard ID that doesn't exist.\n* You specified the array property `dashboardConfigs`, but an\n  element of the array is a dashboard ID that doesn't exist.\n* You specified the array property `teams`, but an element of the\n  array is an invalid team ID.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "`\"application/json\"`\n",
+                "x-description": "Format of the response body. Always  `\"application/json\"`.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "HTTP response code\n",
+                      "x-description": "HTTP response code. Always '400'\n",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error explanation\n",
+                      "x-description": "Error explanation\n",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Retrieve Dashboard Groups Using Query"
+        ],
+        "summary": "Retrieves dashboard groups based on search criteria",
+        "description": "Retrieve dashboard groups based on endpoint query parameters\n",
+        "x-description": "Retrieves the properties of one or more dashboard groups, based on\nsearch criteria you specify in the endpoint URL. If you don't specify\nany parameters, you receive the first 50 groups to which the user\nassociated with the auth token has access. Endpoint parameters also\ncontrol the point in the result set at which the system starts returning\ngroups, and the number of groups to return.\n\n  Note: Splunk Observability Cloud returns a maximum of 10,000 dashboard groups, even if your organization contains more than 10,000. To learn more, see the\n[Considerations for retrieve operations](https://dev.splunk.com/observability/docs/apibasics/retrieve_data_basics#Considerations-for-retrieve-operations) section in the developer guide.\n",
+        "operationId": "Retrieve Dashboard Groups Using Query",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the request body. Always  `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "x-description": "Authentication token\n",
+            "description": "Authentication token\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "dashboardId",
+            "in": "query",
+            "description": "Dashboard ID search string.\n",
+            "x-description": "Search string that will find existing dashboard groups that contain\na dashboard with this dashboard ID.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeCustom",
+            "in": "query",
+            "description": "Dashboard type query value.\n",
+            "x-description": "Value that filters dashboard groups. If the value is set to `true`,\nonly built-in dashboard groups will be returned.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of results to retrieve\n",
+            "x-description": "The maximum number of dashboard groups to return from the overall\nresult set. If the value isn't valid, the system defaults to 50\ngroups.\n",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name query value\n",
+            "x-description": "Search string that the API compares to existing dashboard group\nnames. A match occurs if the string matches any part of the name.\nFor example, the query specification `name=\"per\"` matches the\nfollowing (ellipses represent other parts of the name):\n\n* \"...dropped **per** day...\"\n* \"...95th **per**centile\"\n* \"**per**sonal disk usage...\"\n\nIf you specify `name=\"\"`, the system ignores the search string.\n\nThe string can only contain ASCII characters.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Index at which the API should start returning results\n",
+            "x-description": "0-based index of the point in the overall result set where the API\nstarts returning dashboard groups. If the offset value is greater \nthan the size of the query results, you don't receive any results.\n",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "description": "Team search name string.\n",
+            "x-description": "Search string that will find existing dashboard groups associated with\nthis team ID.\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success\n",
+            "x-description": "Success\n\nNote: If the API fails to find any dashboard groups\nthat satisfy the search criteria, you receive HTTP status \ncode `200` with a response body that contains `\"code\": 200` and\nan empty array.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "`\"application/json\"`\n",
+                "x-description": "Format of the response body. Always  `\"application/json\"`.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "title": "Number of matching dashboard groups",
+                      "description": "Success\n",
+                      "x-description": "Success\n\nNote: If the request is well-formed but the API can't find any\nmatching dashboard groups, the API still returns 200. In this\ncase, the `count` property is set to `0`, and the `results` \narray is empty.\n",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "results": {
+                      "description": "Array of dashboard group objects\n",
+                      "x-description": "List of dashboard groups, in the form of a JSON array of JSON\nobjects\n\nThe size of `results` and the value of `count` are not\nnecessarily equal:\n\n* If you don't specify `limit` or `offset`:\n  If `count > 50`, then `sizeOf(results) = 50`; otherwise\n `sizeOf(results) = count`.\n* If you only specify `limit`:\n  If `count > limit` then `sizeOf(results) = limit`; otherwise\n `sizeOf(results) = count`.\n* If you specify `limit` and `offset`:\n  If `count > (offset + limit)` then `sizeOf(results) = limit`;\n  otherwise, `sizeOf(results) = limit`.\n",
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "authorizedWriters": {
+                            "$ref": "#/components/schemas/DashboardgroupAuthorizedWriters"
+                          },
+                          "created": {
+                            "$ref": "#/components/schemas/DashboardgroupCreated"
+                          },
+                          "creator": {
+                            "$ref": "#/components/schemas/DashboardgroupCreator"
+                          },
+                          "dashboardConfigs": {
+                            "$ref": "#/components/schemas/DashboardConfigs"
+                          },
+                          "dashboardId": {
+                            "$ref": "#/components/schemas/DashboardgroupDashboardId"
+                          },
+                          "dashboards": {
+                            "$ref": "#/components/schemas/DashboardgroupDashboards"
+                          },
+                          "description": {
+                            "$ref": "#/components/schemas/DashboardgroupDescription"
+                          },
+                          "id": {
+                            "$ref": "#/components/schemas/DashboardgroupId"
+                          },
+                          "lastUpdated": {
+                            "$ref": "#/components/schemas/DashboardgroupLastUpdated"
+                          },
+                          "lastUpdatedBy": {
+                            "$ref": "#/components/schemas/DashboardgroupLastUpdatedBy"
+                          },
+                          "name": {
+                            "$ref": "#/components/schemas/DashboardgroupName"
+                          },
+                          "teamId": {
+                            "$ref": "#/components/schemas/DashboardgroupTeamId"
+                          },
+                          "teams": {
+                            "$ref": "#/components/schemas/DashboardgroupTeams"
+                          },
+                          "permissions": {
+                            "$ref": "#/components/schemas/DashboardgroupPermissions"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboardgroup/{id}": {
+      "get": {
+        "tags": [
+          "Retrieve Dashboard Group Using ID"
+        ],
+        "summary": "Retrieves a single dashboard group",
+        "description": "Retrieves a dashboard group based on its ID\n",
+        "x-description": "Retrieves the dashboard group specified by the dashboard group ID in the \n`{id}` path parameter.\n",
+        "operationId": "Retrieve Dashboard Group Using ID",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the request body. Always  `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token\n",
+            "x-description": "Authentication token\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of an existing dashboard group\n",
+            "x-description": "ID of an existing dashboard group.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success\n",
+            "x-description": "Successful retrieval\n",
+            "headers": {
+              "Content-Type": {
+                "description": "`\"application/json\"`\n",
+                "x-description": "Format of the response body. Always  `\"application/json\"`.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authorizedWriters": {
+                      "$ref": "#/components/schemas/DashboardgroupAuthorizedWriters"
+                    },
+                    "created": {
+                      "$ref": "#/components/schemas/DashboardgroupCreated"
+                    },
+                    "creator": {
+                      "$ref": "#/components/schemas/DashboardgroupCreator"
+                    },
+                    "dashboards": {
+                      "$ref": "#/components/schemas/DashboardgroupDashboards"
+                    },
+                    "dashboardConfigs": {
+                      "$ref": "#/components/schemas/DashboardConfigs"
+                    },
+                    "description": {
+                      "$ref": "#/components/schemas/DashboardgroupDescription"
+                    },
+                    "id": {
+                      "$ref": "#/components/schemas/DashboardgroupId"
+                    },
+                    "lastUpdated": {
+                      "$ref": "#/components/schemas/DashboardgroupLastUpdated"
+                    },
+                    "lastUpdatedBy": {
+                      "$ref": "#/components/schemas/DashboardgroupLastUpdatedBy"
+                    },
+                    "name": {
+                      "$ref": "#/components/schemas/DashboardgroupName"
+                    },
+                    "teams": {
+                      "$ref": "#/components/schemas/DashboardgroupTeams"
+                    },
+                    "permissions": {
+                      "$ref": "#/components/schemas/DashboardgroupPermissions"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Update Single Dashboard Group"
+        ],
+        "summary": "Updates a dashboard group",
+        "description": "Updates a dashboard group\n",
+        "x-description": "Updates the dashboard group specified by the `{id}` path parameter,\nusing the properties specified in the request body\n\nThis operation has overwrite semantics. Values you specify in the\nrequest body overwrite existing properties. The API either removes or\nresets properties that you don't specify. Some values you can specify \nfor mirrored dashboard overrides have special meaning:\n\n* Arrays you specify for to the `authorizedWriters`, `dashboards`,\n `dashboardConfigs`, and `teams` array properties overwrite the\n  existing arrays.\n* To add an element to an array, retrieve the existing dashboard group,\n  copy the array, insert into the copy the element you want to add,\n  and send the copy in your PUT request.\n* To add a dashboard mirror, update the `dashboardConfigs` array\n  with a `dashboardConfig` that contains an existing dashboard ID.\n* If the write permissions feature is enabled for your organization,\n  the user ID associated with the request's auth token must have write\n  permission for the group.\n",
+        "operationId": "Update Single Dashboard Group",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the request body. Always  `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token\n",
+            "x-description": "Authentication token\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the dashboard group to update\n",
+            "x-description": "ID of the dashboard group you want to update\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "Properties of an existing dashboard group\n",
+          "x-description": "Properties of an existing dashboard group, in the form of a JSON \nobject\n",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "authorizedWriters": {
+                    "$ref": "#/components/schemas/DashboardgroupAuthorizedWriters"
+                  },
+                  "dashboards": {
+                    "$ref": "#/components/schemas/DashboardgroupDashboards"
+                  },
+                  "dashboardConfigs": {
+                    "$ref": "#/components/schemas/DashboardConfigs"
+                  },
+                  "description": {
+                    "$ref": "#/components/schemas/DashboardgroupDescription"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/DashboardgroupName"
+                  },
+                  "teams": {
+                    "$ref": "#/components/schemas/DashboardgroupTeams"
+                  },
+                  "permissions": {
+                    "$ref": "#/components/schemas/DashboardgroupPermissions"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success\n",
+            "x-description": "Successful update\n",
+            "headers": {
+              "Content-Type": {
+                "description": "`\"application/json\"`\n",
+                "x-description": "Format of the response body. Always  `\"application/json\"`.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authorizedWriters": {
+                      "$ref": "#/components/schemas/DashboardgroupAuthorizedWriters"
+                    },
+                    "created": {
+                      "$ref": "#/components/schemas/DashboardgroupCreated"
+                    },
+                    "creator": {
+                      "$ref": "#/components/schemas/DashboardgroupCreator"
+                    },
+                    "dashboards": {
+                      "$ref": "#/components/schemas/DashboardgroupDashboards"
+                    },
+                    "dashboardConfigs": {
+                      "$ref": "#/components/schemas/DashboardConfigs"
+                    },
+                    "description": {
+                      "$ref": "#/components/schemas/DashboardgroupDescription"
+                    },
+                    "id": {
+                      "$ref": "#/components/schemas/DashboardgroupId"
+                    },
+                    "lastUpdated": {
+                      "$ref": "#/components/schemas/DashboardgroupLastUpdated"
+                    },
+                    "lastUpdatedBy": {
+                      "$ref": "#/components/schemas/DashboardgroupLastUpdatedBy"
+                    },
+                    "name": {
+                      "$ref": "#/components/schemas/DashboardgroupName"
+                    },
+                    "teams": {
+                      "$ref": "#/components/schemas/DashboardgroupTeams"
+                    },
+                    "permissions": {
+                      "$ref": "#/components/schemas/DashboardgroupPermissions"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request\n",
+            "x-description": "The request is invalid, because your request body has one or more of\nthe following generic problems:\n\n* You tried to update the array property `authorizedWriters`\n  by adding an invalid user ID.\n* You tried to update the array property `authorizedWriters`\n  by adding an invalid team ID.\n* You tried to update the array property `dashboards` by\n  adding a dashboard ID that doesn't exist.\n* You tried to update the array property `dashboardConfigs` by\n  adding a dashboard ID that doesn't exist.\n* You tried to update the array property `teams` by adding\n  an invalid team ID.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "`\"application/json\"`\n",
+                "x-description": "Format of the response body. Always  `\"application/json\"`.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "HTTP response code 400\n",
+                      "x-description": "HTTP response code. Always '400'\n",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error explanation\n",
+                      "x-description": "Error explanation\n",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Delete Single Dashboard Group"
+        ],
+        "summary": "Deletes a dashboard group",
+        "description": "Deletes a dashboard group\n",
+        "x-description": "Deletes the dashboard group specified by the `{id}` path parameter.\nDashboards associated with the group are affected as follows:\n\n* If the mirrored dashboard feature isn't available in your organization:\n  Deleting the dashboard group deletes all the dashboards associated with\n  the group.\n* If the mirrored dashboard feature is available in your organization:\n\n  If dashboards in the group are mirrored in other groups, then deleting\n  the dashboard group doesn't delete the dashboards.\n  If dashboards in the group aren't mirrored in other groups, then\n  deleting the dashboard group deletes the dashboards.\n",
+        "operationId": "Delete Single Dashboard Group",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the request payload. The only allowed value is \n `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "x-description": "Authentication token\n",
+            "description": "Authentication token\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of dashboard group to delete\n",
+            "x-description": "ID of an existing dashboard group.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success\n",
+            "x-description": "Successful deletion\n",
+            "headers": {
+              "Content-Type": {
+                "description": "`\"application/json\"`\n",
+                "x-description": "Format of the response payload.\n",
+                "schema": {
+                  "type": "string",
+                  "default": "application/json"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboardgroup/{id}/dashboard": {
+      "post": {
+        "tags": [
+          "Clone Dashboard"
+        ],
+        "summary": "Make a clone of an existing dashboard",
+        "description": "Copies an existing v2 dashboard into a dashboard group\n",
+        "x-description": "Note: This operation doesn't create a mirrored dashboard. Use\nPUT `dashboardgroup/{id}` to add a mirrored dashboard to a\ngroup.\n\nCreates a new v2 dashboard from an existing dashboard and\nassociates it with the dashboard group specified by the `{id}` path\nparameter. The new dashboard is an exact copy of the existing dashboard,\nbut you can change its name, description, and filters by specifying them\nin your request.\n\nIf the write permissions feature is available in\nyour organization, you need to have write permission for the dashboard\ngroup into which you're cloning the dashboard.\n\nIf you don't have write permissions for the dashboard you're cloning,\nSplunk Observability Cloud sets the dashboard permissions on the cloned dashboard so that\nany user can edit it.\n",
+        "operationId": "Clone Dashboard to Group",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the request body. Always  `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token\n",
+            "x-description": "Authentication token\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the target dashboard group\n",
+            "x-description": "ID of an existing dashboard group\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "Request body\n",
+          "x-description": "Properties that the API uses to clone the dashboard into the\ndashboard group specified in the `{id}` path parameter. The only \nrequired property is `sourceDashboard`, which specifies the dashboard\nto copy.\n",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "sourceDashboard"
+                ],
+                "properties": {
+                  "description": {
+                    "$ref": "#/components/schemas/DashboardDescription"
+                  },
+                  "filters": {
+                    "$ref": "#/components/schemas/DashboardChartsFilters"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/DashboardName"
+                  },
+                  "sourceDashboard": {
+                    "$ref": "#/components/schemas/DashboardgroupSourceDashboard"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success\n",
+            "x-description": "Success\n",
+            "headers": {
+              "Content-Type": {
+                "description": "`\"application/json\"`\n",
+                "x-description": "Format of the response body. Always  `\"application/json\"`.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "description": "ID of the new dashboard\n",
+                      "x-description": "ID of the new dashboard.\n",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request\n",
+            "x-description": "The request is invalid. Your request body has at least one of the\nfollowing problems:\n\n* The required property `sourceDashboard` is missing.\n* The value of `sourceDashboard` is not an existing dashboard ID.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "`\"application/json\"`\n",
+                "x-description": "Format of the response body. Always  `\"application/json\"`.\n",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "HTTP response code 400\n",
+                      "x-description": "HTTP response code. Always '400'\n",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error explanation\n",
+                      "x-description": "Error explanation\n",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConfigId": {
+        "title": "Unique identifier for a dashboard configuration",
+        "description": "ID of the group's dashboard configuration object. Set by system.\n",
+        "x-description": "ID of a dashboard configuration associated\nwith the dashboard group\nNote: This property is read-only.\n",
+        "type": "string",
+        "readOnly": true
+      },
+      "DashboardDescription": {
+        "description": "Cloned dashboard description\n",
+        "x-description": "Description of a cloned dashboard\n",
+        "type": "string"
+      },
+      "DashboardId": {
+        "title": "Dashboard ID",
+        "description": "ID of a dashboard associated with the group\n",
+        "x-description": "ID of a dashboard. In a dashboard group,\ndashboard IDs track the dashboards associated with the group.\nIf you try to update the ID of an existing configuration entry or use a\nnon-existent ID, the system returns HTTP error code `400`.\n",
+        "type": "string",
+        "readOnly": false
+      },
+      "DescriptionOverride": {
+        "title": "Override for a dashboard description",
+        "description": "Override string for a mirrored dashboard\n",
+        "x-description": "String that provides a description override for a mirrored dashboard\n",
+        "type": "string",
+        "format": "UTF-8",
+        "maxLength": 1024,
+        "readOnly": false
+      },
+      "FilterOverride": {
+        "title": "Override for the filters associated with a dashboard",
+        "description": "Filter and variable overrides for a mirrored dashboard\n",
+        "x-description": "Filter and dashboard variable overrides for the mirrored dashboard, in\nthe form of a JSON object.\n",
+        "type": "object",
+        "properties": {
+          "sources": {
+            "$ref": "#/components/schemas/FilterSources"
+          },
+          "variables": {
+            "$ref": "#/components/schemas/FilterVariables"
+          }
+        }
+      },
+      "FilterSource": {
+        "title": "A single dashboard filter override",
+        "description": "Single filter override\n",
+        "x-description": "Dashboard filter override that's part of the set of filter overrides for\na mirrored dashboard, in the form of a JSON object.\n",
+        "type": "object",
+        "properties": {
+          "NOT": {
+            "description": "Inverts result of comparing property to values\n",
+            "x-description": "Controls evaluation of the comparison between the `property`\nproperty and the values in the `value` array. If `NOT` is false,\nSplunk Observability Cloud tests `<VALUE_OF_PROPERTY> = <VALUE_n>`; otherwise,\nSplunk Observability Cloud tests `<VALUE_OF_PROPERTY> != <VALUE_n>`.\n",
+            "type": "boolean",
+            "default": false
+          },
+          "property": {
+            "description": "Dimension or custom property in the mirrored dashboard\n",
+            "x-description": "Name of a dimension or custom property for one of the metrics\ndisplayed in the charts for the mirrored dashboard. Splunk Observability Cloud\ncompares the contents of the dimension or property to the values in\n`values`.\n",
+            "type": "string"
+          },
+          "values": {
+            "description": "List of values compared against `property`\n",
+            "x-description": "List of values that Splunk Observability Cloud evaluates against the value of\n`property`. If `values` contains a single element, the evaluation is\n`<VALUE_OF_PROPERTY> = <VALUE[0]>` (or if `NOT` is set to `true`,\n`<VALUE_OF_PROPERTY> != <VALUE[0]>`.\n\nIf `values` contains more than one element, the evaluation expands\nto `(<VALUE_OF_PROPERTY> = <VALUE[0]>) OR\n(<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... `, and the\nresult is true if the value of `property` is equal to any of the\nvalues in `value`.\n\nIf `NOT` is set to `true`, the result is false if `property` is\nequal to one of the values in `value`, regardless of the other\nvalues.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "FilterSources": {
+        "title": "List of dashboard filter overrides",
+        "description": "List of filter overrides\n",
+        "x-description": "List of filter overrides, in the form of a JSON array. The array has the\nsame format as the `filters.sources` array in the request body of\n[POST /dashboard](https://dev.splunk.com/observability/reference/api/dashboards/latest#endpoint-create-single-dashboard).\n\n`FilterSources` provides filter overrides for a mirrored dashboard.\n\nTo specify filter overrides, use one of these options for the value of\n`sources`:\n\n  * List of filters: The mirror uses this list of filter overrides.\n  * `null`: The mirror uses the filters from the dashboard being mirrored.\n  * `\\\"\\\"` or `[ ]` (empty string or empty array): Splunk Observability Cloud clears\n   `filtersOverride.sources`, and the override disables all of the\n    dashboard filters.\n",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/FilterSource"
+        }
+      },
+      "FilterVariable": {
+        "title": "A single dashboard variable override",
+        "description": "Dashboard variable that's part of the overrides for a mirrored dashboard\n",
+        "x-description": "Dashboard variable definition that's part of the overrides for a\nmirrored dashboard, in the form of a JSON object. You can't add a\ndefinition or change a definition name (the value of `property`).\n",
+        "type": "object",
+        "properties": {
+          "preferredSuggestions": {
+            "description": "Values that override preferred suggestions in `property`.\n",
+            "x-description": "List of values that overrides the preferred suggestions for the \ndashboard variable identified by `property`.\nYou can't override this value.\n"
+          },
+          "property": {
+            "description": "Dimension or custom property that's a dashboard variable\n",
+            "x-description": "Name of a dimension or custom property that's already defined as a\ndashboard variable in the dashboard being mirrored. You can't\noverride this value.\n",
+            "type": "string"
+          },
+          "value": {
+            "description": "List of override values\n",
+            "x-description": "List of values that override the `value` associated with `property`\nin the dashboard being mirrored.\n\nTo specify `value` overrides, use one of these options:\n\n* One or more values: The mirrored dashboard compares this list of\n  values to `property`.\n* `null`: The mirror uses `value` from the dashboard being mirrored.\n* `\\\"\\\"` or `[ ]` (empty string or empty array): Splunk Observability Cloud\n  clears the contents of `value`.\n\nSplunk Observability Cloud evaluates the elements of `value` against `property`. If\n`value` contains a single element, the evaluation is \n`<VALUE_OF_PROPERTY> = <VALUE[0]>`.\n\nIf `values` contains more than one element, the evaluation expands to\n`(<VALUE_OF_PROPERTY> = <VALUE[0]>) OR (<VALUE_OF_PROPERTY> = <VALUE[1]>) OR ... `,\nand the result is true if the value of `property` is equal to any of the\nvalues in `value`.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "FilterVariables": {
+        "title": "List of dashboard variable filters",
+        "description": "List of dashboard variable overrides\n",
+        "x-description": "List of dashboard variables overrides for a mirrored dashboard, in the \nform of a JSON array. `filtersOverride.variables` has the same format\nas the `filters.variables` array in the request body of\n[POST /dashboard](https://dev.splunk.com/observability/reference/api/dashboards/latest#endpoint-create-single-dashboard).\n",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/FilterVariable"
+        }
+      },
+      "NameOverride": {
+        "title": "Override for a dashboard name",
+        "description": "Dashboard name override\n",
+        "x-description": "String that overrides the name of the dashboard specified in\n`dashboardId`. This property is primarily intended to provide a unique\nname for a mirrored dashboard.\n"
+      },
+      "DashboardConfig": {
+        "title": "Dashboard configuration in a dashboard group",
+        "description": "Single dashboard configuration in a dashboard group configuration list\n",
+        "x-description": "Entry in the dashboard group's list of dashboard configurations, \nformatted as a JSON object\n\nDashboard configurations store override\nproperties. When you create a mirrored dashboard, Splunk Observability Cloud adds two\ndashboard configurations:\n\n* Configuration for the dashboard being mirrored\n* Configuration for the mirror\n",
+        "type": "object",
+        "required": [
+          "dashboardId"
+        ],
+        "properties": {
+          "configId": {
+            "$ref": "#/components/schemas/ConfigId"
+          },
+          "dashboardId": {
+            "$ref": "#/components/schemas/DashboardId"
+          },
+          "descriptionOverride": {
+            "$ref": "#/components/schemas/DescriptionOverride"
+          },
+          "filtersOverride": {
+            "$ref": "#/components/schemas/FilterOverride"
+          },
+          "nameOverride": {
+            "$ref": "#/components/schemas/NameOverride"
+          }
+        }
+      },
+      "DashboardConfigs": {
+        "title": "List of dashboard configurations",
+        "description": "List of dashboard configurations for this dashboard group\n",
+        "x-description": "List of dashboard configurations associated with the dashboard group, \nin the form of a JSON array of JSON objects. In the UI, Splunk Observability Cloud\nuses the set of configurations for a group to determine which dashboards\nto display for the group.\n",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DashboardConfig"
+        }
+      },
+      "DashboardgroupSourceDashboard": {
+        "title": "Dashboard ID of a cloned dashboard",
+        "description": "ID of dashboard to clone\n",
+        "x-description": "The ID of the dashboard to clone into the dashboard group whose ID is\nspecified in the `{id}` path parameter\n",
+        "type": "string"
+      },
+      "DashboardName": {
+        "description": "Dashboard label\n",
+        "x-description": "A human-readable label for the dashboard. The UI displays this label\nin the dashboard's group.\n",
+        "type": "string"
+      },
+      "DashboardChartsWebUIFilter": {
+        "title": "Filter that appears in the UI",
+        "description": "Filter that appears in the UI\n",
+        "x-description": "The specification for a filter that appears in the UI. The filter\ncompares the value of a dimension or custom property to a value\nspecified in this filter. You can specify the following in the\nfilter:\n\n* A default value\n* A list of suggested values to display in the UI\n* A flag that controls user input; if set to `true`, users are limited\n  to the default and suggested values.\n\nYou can also force users to choose this filter in order to see data in\nthe dashboard's charts.\n",
+        "type": "object",
+        "required": [
+          "property",
+          "value"
+        ],
+        "properties": {
+          "alias": {
+            "description": "Filter label\n",
+            "x-description": "A label for the filter. The system displays this label in the area\npreceding the input textarea for the filter in the UI.\n\nNote: A good way to indicate that the string is a label is to\nappend a space and a colon (\":\") to it.\n",
+            "type": "string"
+          },
+          "preferredSuggestions": {
+            "description": "List of preferred suggestions for values\n",
+            "x-description": "List of strings containing values to place at the top of the\n**Suggested Values** dropdown in UI for the dashboard, in the\nform of a JSON array. If `ChartsWebUIFilter.restricted` is `true`,\nthe filter must use one of the values in the list; users only have a\nchoice of selecting a value from this list.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "property": {
+            "description": "Custom property or dimension name to filter against\n",
+            "x-description": "Name of a custom property or dimension to filter against.\n\nNote: If the dimension or custom property doesn't exist in any\nof the charts for the dashboard, the system doesn't display any \ndata in the charts.\n",
+            "type": "string"
+          },
+          "required": {
+            "description": "Controls display of chart data\n",
+            "x-description": "Flag that controls the display of chart data. If `true`, users must\nuse this filter in order to see data; otherwise, users can delete\nthe filter.\n",
+            "type": "boolean",
+            "default": false
+          },
+          "restricted": {
+            "description": "Controls values in filter\n",
+            "x-description": "Flag that controls the values allowed in the filter. If `true`, the\nonly allowable values are those specified in the\n`ChartsWebUIFilter.preferredSuggestions` array; otherwise, any value\nis allowed.\n",
+            "type": "boolean",
+            "default": false
+          },
+          "value": {
+            "description": "List of values to compare to the value in `ChartsWebUIFilter.property`\n",
+            "x-description": "A list of values to compare to the value of the dimension or custom\nproperty specified in `ChartsWebUIFilter.property`. If the list\ncontains more than one value, the filter becomes a set of queries\nbetween the value of `property` and each element of `value`. The\nsystem joins these queries with an implicit OR.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DashboardChartsSingleFilter": {
+        "title": "Filter to apply to charts in a dashboard",
+        "description": "A single filter object to apply to charts\n",
+        "x-description": "A single filter object to apply to the charts in the dashboard. The\nfilter specifies a default or user-defined dimension or custom property.\nYou can either include or exclude all the data that matches the\ndimension or custom property.\n",
+        "type": "object",
+        "required": [
+          "property",
+          "value"
+        ],
+        "properties": {
+          "NOT": {
+            "description": "Inverts comparison used by filter\n",
+            "x-description": "Flag that indicates how the filter should operate. If `true`, data\nthat matches the criteria is excluded from charts; otherwise, data\nthat matches the criteria is included.\n",
+            "type": "boolean",
+            "default": false
+          },
+          "property": {
+            "description": "Name of dimension or custom property to filter on\n",
+            "x-description": "Name of the dimension or custom property to match to the data\n\nNote: If the dimension or custom property doesn't exist in any\nof the charts for the dashboard, and `ChartsFilter.NOT` is `true`,\nthe system doesn't display any data in the charts.\n",
+            "type": "string"
+          },
+          "value": {
+            "description": "List of values to compare to the value in `property`.\n",
+            "x-description": "A list of values to compare to the value of the dimension or custom\nproperty specified in `ChartsFilter.property`. If the list contains\nmore than one value, the filter becomes a set of queries between the\nvalue of `property` and each element of `value`. The system joins\nthese queries with an implicit OR.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DashboardChartsFilters": {
+        "title": "Filters to apply to all the charts of the cloned dashboard",
+        "description": "Filter properties to apply to the cloned dashboard\n",
+        "x-description": "Specifies the properties of filters to apply to the cloned dashboard.\n\nThis is an optional property that you only need to use if you\nwant to override the `filters` property of the dashboard you're cloning.\nFilters give you fine-grained control over the data displayed in the\ncharts in the dashboard. You can specify ad hoc filters or save them\nas variables for repeated use of the filter criteria.\n\nYou can also use filters to apply a custom time window to all of the charts in the\ndashboard.\n",
+        "type": "object",
+        "properties": {
+          "sources": {
+            "description": "List of filter objects to apply to charts in the cloned dashboard\n",
+            "x-description": "List of filter objects to apply to the charts in the dashboard. \nEach object specifies a single filter for a default or user-defined \ndimension or custom property.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardChartsSingleFilter"
+            }
+          },
+          "time": {
+            "description": "Time range for all charts in the dashboard\n",
+            "x-description": "Time range to show in all of the charts in the dashboard. The\nspecifications in this object override those in each individual\nchart. If you don't specify values, the system defaults to using the\nindividual time setting for each chart.\n",
+            "type": "object",
+            "properties": {
+              "end": {
+                "description": "End value of time range\n",
+                "x-description": "The end of the time range to show for all charts in the\ndashboard. If you don't specify a value for this property, the \nsystem defaults to the value for each chart's `end`\nproperty.\n\nNote: The specified type for `end` is `string`, but the\nsystem also accepts a 64-bit signed integer >= 0 that represents a\ntimestamp in *nix time in milliseconds.\n",
+                "type": "string"
+              },
+              "start": {
+                "description": "Start value of time range\n",
+                "x-description": "The start of the time range to show for all charts in the\ndashboard. If you don't specify a value for this property, the \nsystem defaults to the value for each chart's `start`\nproperty\n\nNote: The specified type for `start` is\n`string`, but the system also accepts a 64-bit signed integer >= 0\nthat represents a timestamp in *nix time in milliseconds.\n",
+                "type": "string"
+              }
+            }
+          },
+          "variables": {
+            "description": "List of filters that appears at the top of a dashboard\n",
+            "x-description": "List of UI-oriented filters that appear at the top of the\ndashboard, in the form of a JSON array. For each filter you can\nspecify a name and a label for the dimension or custom property to\nfilter against, a list of suggested comparison values to display in\nthe UI, and other properties that control the UI display. To\nsee a more detailed description of the options, refer to the\nproperty descriptions for the `ChartsWebUIFilter` model.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardChartsWebUIFilter"
+            }
+          }
+        }
+      },
+      "DashboardgroupAuthorizedWriters": {
+        "title": "Organizations and teams with write permission for an object",
+        "description": "Organizations and teams that have write permission for this dashboard group\n",
+        "x-description": "Set of organizations and teams that have write permission for the\ndashboard group, in the form of a JSON object. If your organization has\nthe write permissions feature enabled, you can use this object to\nspecify the user and team IDs that have write access to the dashboard\ngroup\n",
+        "type": "object",
+        "properties": {
+          "teams": {
+            "description": "List of team IDs that have write access\n",
+            "x-description": "List of team IDs that have write access to the group, in the form of\na JSON array\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "users": {
+            "description": "List of user IDs that have write access\n",
+            "x-description": "Array of user IDs that have write access to the group\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DashboardgroupDashboards": {
+        "title": "List of dashboards to add to the dashboard group",
+        "description": "List of dashboard IDs that are associated with this dashboard group\n",
+        "x-description": "List of dashboards, in the form of a JSON array of dashboard IDs. The\nsystem adds the specified dashboards to the dashboard group you're\ncreating. If you omit the property, the system creates a new dashboard\nand assigns it to the new dashboard group.\n",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "description": "ID of an existing dashboard\n",
+          "x-description": "Dashboard ID of an existing dashboard. If this\ndashboard already belongs to a dashboard group, the system rejects the\nrequest.\n"
+        }
+      },
+      "DashboardgroupDescription": {
+        "description": "Dashboard group description\n",
+        "x-description": "Description of the dashboard group. This value appears in the tooltip \nfor the dashboard group on the Dashboards page in the UI. For this\nvalue, you can use up to 1024 UTF-8 characters.\n",
+        "type": "string",
+        "format": "UTF-8",
+        "maxLength": 1024
+      },
+      "DashboardgroupName": {
+        "description": "Dashboard group name\n",
+        "x-description": "Name of the dashboard group. This value identifies the dashboard group \nin the UI. It appears on the dashboards page and in the catalog. It\nalso appears at the top left corner of the screen whenever you're\nviewing a dashboard that the group contains.\n",
+        "type": "string",
+        "minLength": 1
+      },
+      "DashboardgroupTeams": {
+        "description": "List of existing teams, in the form of a JSON array of team IDs. The\ndashboard group appears on the team landing page for any team in the\nlist.\n",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "description": "Team ID\n",
+          "x-description": "Team ID\n"
+        }
+      },
+      "DashboardgroupTeamId": {
+        "description": "ID of the team that the dashboard group belongs to.\n",
+        "x-description": "ID of the team that the dashboard group belongs to. \n",
+        "type": "string"
+      },
+      "DashboardgroupId": {
+        "description": "ID of this dashboard group\n",
+        "x-description": "ID for this dashboard group.\n",
+        "type": "string"
+      },
+      "DashboardgroupCreated": {
+        "description": "The dashboard group creation date and time, in the form of a Unix time\nvalue. \n\nThe system sets this value, and you can't modify it.\n",
+        "type": "integer",
+        "format": "int64"
+      },
+      "DashboardgroupDashboardId": {
+        "description": "ID of the dashboard that is associated with the dashboard group.\n",
+        "x-description": "The ID of the dashboard that the dashboard group contains.\n",
+        "type": "string"
+      },
+      "DashboardgroupCreator": {
+        "description": "ID of user who created the dashboard group\n",
+        "x-description": "User ID of the user that created the dashboard group.\nIf the system created this dashboard group, the value is `\"AAAAAAAAAA\"`.\nThe system sets this value, and you can't modify it.\n",
+        "type": "string"
+      },
+      "DashboardgroupLastUpdated": {
+        "description": "Dashboard group last updated date and time, in *nix time in milliseconds\n",
+        "x-description": "The last time the dashboard group was updated, in *nix time in milliseconds.\n\nThe system sets this value, and you can't modify it.\n",
+        "type": "integer",
+        "format": "int64"
+      },
+      "DashboardgroupLastUpdatedBy": {
+        "description": "ID of user who last updated the dashboard group\n",
+        "x-description": "ID of the last user who updated the dashboard group.\nIf the last update was by the system, the value is \"AAAAAAAAAA\". This\nvalue is read-only.\n",
+        "type": "string"
+      },
+      "DashboardgroupPermissions": {
+        "title": "Permission configuration for the dashboard",
+        "description": "Read and write permission configuration for dashboard groups\n",
+        "x-description": "Read and write permission configuration to specify which user, team, and organization can view and/or edit your dashboard group.\n",
+        "type": "object",
+        "properties": {
+          "acl": {
+            "description": "List of permission configurations\n",
+            "x-description": "List of permission configurations.\n\nUse this list to specify read and write permissions for your dashboard group.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardgroupACL"
+            }
+          },
+          "parent": {
+            "description": "Default to `null` for dashboard groups.\n",
+            "x-description": "The `parent` property is `null` by default for dashboard groups and can't be changed.\n\nWhen configured for a dashboard, `parent` is the ID of the dashboard group you want your dashboard to inherit permissions from.\n",
+            "type": "string"
+          }
+        }
+      },
+      "DashboardgroupACL": {
+        "title": "An access control layer",
+        "description": "A permission configuration for a user, team, or organization.\n",
+        "x-description": "A permission configuration for a user, team, or organization.\n",
+        "type": "object",
+        "properties": {
+          "actions": {
+            "description": "Action the user, team, or oganization can take.\n",
+            "x-description": "Action the user, team, or organization can take with the dashboard group.\n",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "READ",
+                "WRITE"
+              ]
+            }
+          },
+          "principalType": {
+            "description": "Clarify whether this permission configuration is for a user, a team, or an organization.\n",
+            "x-description": "Clarify whether this permission configuration is for a user, a team, or an organization.\n",
+            "type": "string",
+            "enum": [
+              "USER",
+              "TEAM",
+              "ORG"
+            ]
+          },
+          "principalId": {
+            "description": "ID of the user, team, or organization.\n",
+            "x-description": "ID of the user, team, or organization for which you're granting permissions.\n",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

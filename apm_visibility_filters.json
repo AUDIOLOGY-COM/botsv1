@@ -1,0 +1,523 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "3.0.1",
+    "title": "APM visibility filters API",
+    "description": "APIs to manage visibility filters on indexed and unindexed span tags in Splunk APM. These filters identify and hide span tag values that might contain sensitive data from everywhere in Splunk APM. Note that the tags are hidden rather than purged; information is not purged from Splunk APM until it expires after the 8-day default retention period.  \n\n## Requirements\n\n* You must have an organization access token with the API permission or a session token to use the API.\n* You have to have the Splunk Observability Cloud admin, power, or read_only role to use the `GET /apm/visibility/filter` and `GET /apm/visibility-filter/{FilterId}` operations.\n* You have to have the Splunk Observability Cloud admin role to use the `POST /apm/visibility-filter`, `DELETE /apm/visibility-filter/{FilterId}`, and `PUT /apm/visibility-filter/{FilterId}/enabled` operations.\n",
+    "x-description": "APIs to manage visibility filters on indexed and unindexed span tags in Splunk APM. These filters identify and hide span tag values that might contain sensitive data from everywhere in Splunk APM. Note that the tags are hidden rather than purged; information is not purged from Splunk APM until it expires after the 8-day default retention period.  \n\n## Requirements\n\n* You must have an organization access token with the API permission or a session token to use the API.\n* You have to have the Splunk Observability Cloud admin, power, or read_only role to use the `GET /apm/visibility/filter` and `GET /apm/visibility-filter/{FilterId}` operations.\n* You have to have the Splunk Observability Cloud admin role to use the `POST apm/visibility-filter`, `DELETE apm/visibility-filter/{FilterId}`, and `PUT apm/visibility-filter/{FilterId}/enabled` operations.\n"
+  },
+  "servers": [
+    {
+      "url": "https://api.{REALM}.observability.splunkcloud.com/v2",
+      "x-comment": "Note: In the **servers** object, the `url` field must end with `v2`. Field patterns in the **paths** object must **not** start with `v2`.\n",
+      "description": "Base API URL for the APM visibility filter endpoint\n",
+      "x-description": "Base API URL for the APM visibility filter endpoint\n"
+    }
+  ],
+  "paths": {
+    "/apm/visibility-filter": {
+      "get": {
+        "summary": "Gets a list of all visibility filters. \n",
+        "description": "Gets a list of all visibility filters. To manage payload volume, this operation expects a limit parameter to indicate how many results to return per page and an offset parameter to indicate the filter position at which to begin returning values. \n\n* `limit`: Indicates how many results to return for the request\n* `offset`: Indicates the position in the list of filters at which to start returning values.\n\n## Requirements\n\nYou have to have the Splunk Observability Cloud admin, power, or read_only role to use the `GET /apm/visibility/filter` operation.\n\nNote: Splunk Observability Cloud returns a maximum of 10,000 visibility filters, even if your organization contains more than 10,000. To learn more, see the\n[Considerations for retrieve operations](https://dev.splunk.com/observability/docs/apibasics/retrieve_data_basics#Considerations-for-retrieve-operations) section in the developer guide.\n",
+        "x-description": "Gets a list of all visibility filters. To manage payload volume, this operation expects the following parameters:\n\n* `limit`: Indicates how many results to return for the request\n* `offset`: Indicates the position in the list of filters at which to start returning values.\n\nNote: Splunk Observability Cloud returns a maximum of 10,000 visibility filters, even if your organization contains more than 10,000. To learn more, see the\n[Considerations for retrieve operations](https://dev.splunk.com/observability/docs/apibasics/retrieve_data_basics#Considerations-for-retrieve-operations) section in the developer guide.\n",
+        "operationId": "getAllVisibilityFilters",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "x-description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of filters to return in the response. \n",
+            "x-description": "Maximum number of filters to return in the response. \n",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "required": true
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Position of filter from which to begin returning values.\n",
+            "x-description": "Position of filter from which to begin returning values.\n",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "x-description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidFilterListResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/GETError400InvalidRequest"
+          },
+          "403": {
+            "description": "Absent or invalid authentication token.\n",
+            "x-description": "Absent or invalid authentication token.\n"
+          }
+        }
+      },
+      "post": {
+        "summary": "Creates a filter and returns the filter ID. \n",
+        "description": "Creates a filter and returns the filter ID. \n\n## Requirements\n\nYou have to have the Splunk Observability Cloud admin role to use the `POST apm/visibility-filter` operation.\n",
+        "x-description": "Creates a filter and returns the filter ID. \n\n## Requirements\n\nYou have to have the Splunk Observability Cloud admin role to use the `POST apm/visibility-filter` operation.\n",
+        "operationId": "createVisibilityFilter",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "x-description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "x-description": "Request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidFilterRequestObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "x-description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidFilterResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/POSTError400InvalidRequest"
+          },
+          "403": {
+            "description": "Absent or invalid authentication token.\n",
+            "x-description": "Absent or invalid authentication token.\n"
+          }
+        }
+      }
+    },
+    "/apm/visibility-filter/{FilterId}": {
+      "get": {
+        "summary": "Gets an individual visibility filter based on the filter ID.\n",
+        "description": "Gets an individual visibility filter based on the filter ID.\n\n## Requirements\n\nYou have to have the Splunk Observability Cloud admin, power, or read_only role to use the `GET /apm/visibility-filter/{FilterId}` operation.\n",
+        "x-description": "Gets an individual visibility filter based on the filter ID.\n\n## Requirements\n\nYou have to have the Splunk Observability Cloud admin, power, or read_only role to use the `GET /apm/visibility-filter/{FilterId}` operation.\n",
+        "operationId": "getIndividualVisibilityFilter",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "x-description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "FilterId",
+            "in": "path",
+            "description": "Filter ID of the visibility filter you want to retrieve. \n",
+            "x-description": "Filter ID of the visibility filter you want to retrieve. \n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "x-description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidFilterResponseObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Absent or invalid authentication token.\n",
+            "x-description": "Absent or invalid authentication token.\n"
+          },
+          "404": {
+            "description": "\"Visibility Filter with filterId = test-id not found.\"\n",
+            "x-description": "\"Visibility Filter with filterId = test-id not found.\"\n"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Performs a hard delete on the filter associated with the filter ID."
+        ],
+        "summary": "Performs a hard delete on the filter associated with the filter ID.  \n",
+        "description": "Performs a hard delete on the filter associated with the filter ID.  \n\n## Requirements\n\nYou have to have the Splunk Observability Cloud admin role to use the `DELETE apm/visibility-filter/{FilterId}` operation.\n",
+        "x-description": "Performs a hard delete on the filter associated with the filter ID.  \n\n## Requirements\n\nYou have to have the Splunk Observability Cloud admin role to use the `DELETE apm/visibility-filter/{FilterId}` operation.\n",
+        "operationId": "deleteVisibilityFilter",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "x-description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "FilterId",
+            "in": "path",
+            "description": "Filter ID of the visibility filter you want to delete. \n",
+            "x-description": "Filter ID of the visibility filter you want to delete. \n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Filter deleted successfully. \n",
+            "x-description": "Filter deleted successfully. \n"
+          },
+          "403": {
+            "description": "Absent or invalid authentication token.\n",
+            "x-description": "Absent or invalid authentication token.\n"
+          },
+          "404": {
+            "description": "Visibility Filter test-id not found.\n",
+            "x-description": "Visibility Filter test-id not found.\n"
+          }
+        }
+      }
+    },
+    "/apm/visibility-filter/{FilterId}/enabled": {
+      "put": {
+        "summary": "Enables or disables the filter associated with the filter ID. \n",
+        "description": "Enables or disables the filter associated with the filter ID. \n\n## Requirements\n\nYou have to have the Splunk Observability Cloud admin role to use the `PUT apm/visibility-filter/{FilterId}/enabled` operation.\n",
+        "x-description": "Enables or disables the filter associated with the filter ID. \n\n## Requirements\n\nYou have to have the Splunk Observability Cloud admin role to use the `PUT apm/visibility-filter/{FilterId}/enabled` operation.\n",
+        "operationId": "enableVisibilityFilter",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "x-description": "Authentication token. Must be a session token (User API access token) associated with an administrator.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "FilterId",
+            "in": "path",
+            "description": "Filter ID of the visibility filter you want to enable or disable. \n",
+            "x-description": "Filter ID of the visibility filter you want to enable or disable. \n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "x-description": "Update visibility filter request body",
+          "description": "Update visibility filter request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "Boolean indicating whether you want to enable or disable the specified visibility filter. 'true' to enable filter; 'false' to disable. \n",
+                "x-description": "Boolean indicating whether whether you want to enable or disable the specified visibility filter. 'true' to enable filter; 'false' to disable. \n",
+                "type": "boolean",
+                "example": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "x-description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidFilterResponseObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body must be either `null`, `true`, `false`, or `NaN`.\n",
+            "x-description": "The request body must be either `null`, `true`, `false`, or `NaN`.\n"
+          },
+          "403": {
+            "description": "Absent or invalid authentication token.\n",
+            "x-description": "Absent or invalid authentication token.\n"
+          },
+          "404": {
+            "description": "Visibility Filter test-id not found.\n",
+            "x-description": "Visibility Filter test-id not found.\n"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ValidFilterResponseObject": {
+        "description": "JSON object containing the body of a visibility filter in an API response. \n",
+        "x-description": "JSON object containing the body of a visibility filter in an API response. \n",
+        "type": "object",
+        "properties": {
+          "filterId": {
+            "description": "Unique ID that identifies a filter. Splunk APM adds this ID to a span affected by the filter. \n",
+            "x-description": "Unique ID that identifies a filter. Splunk APM adds this ID to a span affected by the filter. \n",
+            "type": "string",
+            "example": "507f191e810c19729de860ea"
+          },
+          "description": {
+            "description": "User-readable string that describes the filter in detail. The string also appears as a tag in the span that's affected by the filter.\n",
+            "x-description": "User-readable string that describes the filter in detail. The string also appears as a tag in the span that's affected by the filter.\n",
+            "type": "string",
+            "example": "Data blocked due to leak on 04/01/21"
+          },
+          "startTime": {
+            "description": "Start time of filter. Splunk APM applies the filter to spans received at or after this time. The value must be in ISO 8601 format or *nix time format in milliseconds, and the the value of `startTime` must be earlier than `endTime`; if these conditions aren't met, the API returns an HTTP response code 400.\n\nIs it acceptable to specify `startTime` without `endTime`.\n",
+            "x-description": "Start time of filter. Splunk APM applies the filter to spans received at or after this time. The value must be in ISO 8601 format or *nix time format in milliseconds, and the the value of `startTime` must be earlier than `endTime`; if these conditions aren't met, the API returns an HTTP response code 400.\n\nIs it acceptable to specify `startTime` without `endTime`.\n",
+            "type": "string",
+            "example": "2021-04-03T15:00:00+0000Z"
+          },
+          "endTime": {
+            "description": "End time of filter; filter is applied to spans reported at or before this time. If a value is specified for `startTime`, the value specified in `endTime` must be later than `startTime`. This value must be in ISO 8601 format; if these conditions aren't met, the API returns an HTTP response code 400.\n",
+            "x-description": "End time of filter; filter is applied to spans reported at or before this time. If a value is specified for `startTime`, the value specified in `endTime` must be later than `startTime`. This value must be in ISO 8601 format; if these conditions aren't met, the API returns an HTTP response code 400.\n",
+            "type": "string",
+            "nullable": true,
+            "example": "2021-14-21T17:00:00+0000Z"
+          },
+          "matcher": {
+            "description": "A JSON object containing a map of key-value pairs that define the match criteria for this filter. The API attempts to match the keys to fields in the span. If it finds a match, the API then compares the value of the map entry to the value in the span. If all the entries in the map are a match to the span, the API applies the filter to the span. You can provide up to 50 key-value pairs, and you must provide the keys `sf_service` and `sf_operation`; if you exceed 50 pairs or you fail to provide the required keys and values, the API returns an HTTP response code 400.\n",
+            "x-description": "A JSON object containing a map of key-value pairs that define the match criteria for this filter. The API attempts to match the keys to fields in the span. If it finds a match, the API then compares the value of the map entry to the value in the span. If all the entries in the map are a match to the span, the API applies the filter to the span. You can provide up to 50 key-value pairs, and you must provide the keys `sf_service` and `sf_operation`; if you exceed 50 pairs or you fail to provide the required keys and values, the API returns an HTTP response code 400.\n",
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "sf_service": "checkoutService",
+              "sf_operation": "readCartDetails",
+              "buildId": "1234",
+              "http.method": "GET"
+            }
+          },
+          "visibleTags": {
+            "description": "A JSON array that contains a list of tags, both indexed and unindexed, that you specify are safe to display in the Splunk APM UI. If you provide this field, you must include the following tags:\n`sf_environment`, `sf_service`, `sf_endpoint`, `sf_operation`, `sf_httpMethod`, `sf_kind`, `sf_workflow`, and `sf_error`. If these tags are missing, the API returns a HTTP response error code 400. \n\nA tag must not appear in both `visibleTags` and `hiddenTags` in the same request; if you violate this requirement, the API returns an HTTP response code 400.\n",
+            "x-description": "A JSON array that contains a list of tags, both indexed and unindexed, that you specify are safe to display in the Splunk APM UI. If you provide this field, you must include the following tags:\n`sf_environment`, `sf_service`, `sf_endpoint`, `sf_operation`, `sf_httpMethod`, `sf_kind`, `sf_workflow`, and `sf_error`. If these tags are missing, the API returns a HTTP response error code 400. \n\nA tag must not appear in both `visibleTags` and `hiddenTags` in the same request; if you violate this requirement, the API returns an HTTP response code 400.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": "[\"sf_environment\", \"sf_service\", \"sf_endpoint\", \"sf_operation\", \"sf_httpMethod\", \"sf_kind\", \"sf_workflow\", \"sf_error\", \"buildId\", \"environment\"]\n"
+          },
+          "hiddenTags": {
+            "description": "A JSON array that contains a list of tags, both indexed and unindexed, that you specify must not appear in the Splunk APM UI. \n\n`visibleTags` is related to the `hiddenTags` field. A tag must not appear in `visibleTags` and `hiddenTags` in the same request; if you violate this requirement, the API returns an HTTP response code 400.\n",
+            "x-description": "A JSON array that contains a list of tags, both indexed and unindexed, that you specify must not appear in Splunk APM. \n\n`visibleTags` is related to the `hiddenTags` field. A tag must not appear in `visibleTags` and `hiddenTags` in the same request; if you violate this requirement, the API returns an HTTP response code 400.         \n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "status",
+              "user_name"
+            ]
+          },
+          "enabled": {
+            "description": "A boolean flag you can use to enable or disable a filter. This value is set to `true` by default. \n",
+            "x-description": "A boolean flag you can use to enable or disable a filter. This value is set to `true` by default.\n",
+            "type": "boolean",
+            "nullable": true,
+            "example": true
+          }
+        }
+      },
+      "ValidFilterListResponseObject": {
+        "description": "List of all visibility filters in organization. \n",
+        "x-description": "List of all visibility filters in organization. \n",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ValidFilterResponseObject"
+        }
+      },
+      "ValidFilterRequestObject": {
+        "description": "JSON object specifying the field values of a visibility filter in an API request. \n\nNote the following logic involving the related `matcher`, `visibleTags`, and `hiddenTags` fields:\n\nWhen all three fields are present, `visibleTags` defines the list of span tags that Splunk APM leaves visible in the span. Splunk APM hides any tags provided in the `hiddenTags` list, as well as any other not provided in either list. \n\nWhen only `matcher` and `visibleTags` are present, `visibleTags` defines  the list of span tags that Splunk APM leaves visible in the span. All other tags in each affected span are hidden. \n\nWhen only `matcher` and `hiddenTags` are present, `hiddenTags` defines  the list of span tags that Splunk APM hides in the span. All other tags in each affected span are left visible. \n\nWhen only `matcher` is present and both `visibleTags` and `hiddenTags` are absent, the set of field names in `matcher` will define the list of visible tags. Splunk APM also leaves the following mandatory tags visible: `sf_environment`, `sf_service`, `sf_endpoint`, `sf_operation`, `sf_httpMethod`, `sf_kind`, `sf_workflow`, and `sf_error`.\n",
+        "x-description": "JSON object specifying the field values of a visibility filter in an API request. \n\nNote the following logic involving the related `matcher`, `visibleTags`, and `hiddenTags` fields:\n\nWhen all three fields are present, `visibleTags` defines the list of span tags that Splunk APM leaves visible in the span. Splunk APM hides any tags provided in the `hiddenTags` list, as well as any other not provided in either list. \n\nWhen only `matcher` and `visibleTags` are present, `visibleTags` defines  the list of span tags that Splunk APM leaves visible in the span. All other tags in each affected span are hidden. \n\nWhen only `matcher` and `hiddenTags` are present, `hiddenTags` defines  the list of span tags that Splunk APM hides in the span. All other tags in each affected span are left visible. \n\nWhen only `matcher` is present and both `visibleTags` and `hiddenTags` are absent, the set of field names in `matcher` will define the list of visible tags. Splunk APM also leaves the following mandatory tags visible: `sf_environment`, `sf_service`, `sf_endpoint`, `sf_operation`, `sf_httpMethod`, `sf_kind`, `sf_workflow`, and `sf_error`.\n",
+        "type": "object",
+        "properties": {
+          "description": {
+            "description": "User-readable string that describes the filter in detail. The string also appears as a tag in the span that's affected by the filter.\n",
+            "x-description": "User-readable string that describes the filter in detail. The string also appears as a tag in the span that's affected by the filter.\n",
+            "type": "string",
+            "example": "Private information blocked due to leak on 06/21/21"
+          },
+          "startTime": {
+            "description": "Start time of filter. Splunk APM applies the filter to spans received at or after this time. The value must be in ISO 8601 format, and the the value of `startTime` must be earlier than `endTime`; if these conditions aren't met, the API returns an HTTP response code 400.\n\nIs it acceptable to specify `startTime` without `endTime`.\n",
+            "x-description": "Start time of filter. Splunk APM applies the filter to spans received at or after this time. The value must be in ISO 8601 format, and the the value of `startTime` must be earlier than `endTime`; if these conditions aren't met, the API returns an HTTP response code 400.\n\nIs it acceptable to specify `startTime` without `endTime`.\n",
+            "type": "string",
+            "example": "2021-06-21T15:00:00+0000Z"
+          },
+          "endTime": {
+            "description": "End time of filter; filter is applied to spans reported at or before this time. If a value is specified for `startTime`, the value specified in `endTime` must be later than `startTime`. This value must be in ISO 8601 or *nix time format in milliseconds; if these conditions aren't met, the API returns an HTTP response code 400.\n",
+            "x-description": "End time of filter; filter is applied to spans reported at or before this time. If a value is specified for `startTime`, the value specified in `endTime` must be later than `startTime`. This value must be in ISO 8601 or *nix time format in milliseconds; if these conditions aren't met, the API returns an HTTP response code 400.\n",
+            "type": "string",
+            "nullable": true,
+            "example": "2021-12-21T17:00:00+0000Z"
+          },
+          "matcher": {
+            "description": "A JSON object containing a map of key-value pairs that define the match criteria for this filter. The API attempts to match the keys to fields in the span. If it finds a match, the API then compares the value of the map entry to the value in the span. If all the entries in the map are a match to the span, the API applies the filter to the span. You can provide up to 50 key-value pairs, and you must provide the keys `sf_service` and `sf_operation`; if you exceed 50 pairs or you fail to provide the required keys and values, the API returns an HTTP response code 400.\n",
+            "x-description": "A JSON object containing a map of key-value pairs that define the match criteria for this filter. The API attempts to match the keys to fields in the span. If it finds a match, the API then compares the value of the map entry to the value in the span. If all the entries in the map are a match to the span, the API applies the filter to the span. You can provide up to 50 key-value pairs, and you must provide the keys `sf_service` and `sf_operation`; if you exceed 50 pairs or you fail to provide the required keys and values, the API returns an HTTP response code 400.\n",
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "sf_service": "paymentService",
+              "sf_operation": "enterCardInfo",
+              "buildId": "2213",
+              "http.method": "PUT"
+            }
+          },
+          "visibleTags": {
+            "description": "A JSON array that contains a list of tags, both indexed and unindexed, that you specify are safe to display in the Splunk APM UI. If you provide this field, you must include the following tags:\n`sf_environment`, `sf_service`, `sf_endpoint`, `sf_operation`, `sf_httpMethod`, `sf_kind`, `sf_workflow`, and `sf_error`. If these tags are missing, the API returns a HTTP response error code 400. \n\nA tag must not appear in both `visibleTags` and `hiddenTags` in the same request; if you violate this requirement, the API returns an HTTP response code 400.\n",
+            "x-description": "A JSON array that contains a list of tags, both indexed and unindexed, that you specify are safe to display in the Splunk APM UI. If you provide this field, you must include the following tags:\n`sf_environment`, `sf_service`, `sf_endpoint`, `sf_operation`, `sf_httpMethod`, `sf_kind`, `sf_workflow`, and `sf_error`. If these tags are missing, the API returns a HTTP response error code 400. \n\nA tag must not appear in both `visibleTags` and `hiddenTags` in the same request; if you violate this requirement, the API returns an HTTP response code 400.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": "[\"sf_environment\", \"sf_service\", \"sf_endpoint\", \"sf_operation\", \"sf_httpMethod\", \"sf_kind\", \"sf_workflow\", \"sf_error\", \"buildId\", \"environment\"]\n"
+          },
+          "hiddenTags": {
+            "description": "A JSON array that contains a list of tags, both indexed and unindexed, that you specify must not appear in the Splunk APM UI. \n\n`visibleTags` is related to the `hiddenTags` field. A tag must not appear in `visibleTags` and `hiddenTags` in the same request; if you violate this requirement, the API returns an HTTP response code 400.\n",
+            "x-description": "A JSON array that contains a list of tags, both indexed and unindexed, that you specify must not appear in the Splunk APM UI. \n\n`visibleTags` is related to the `hiddenTags` field. A tag must not appear in `visibleTags` and `hiddenTags` in the same request; if you violate this requirement, the API returns an HTTP response code 400.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "card_number",
+              "cvv",
+              "expiration_date"
+            ]
+          },
+          "enabled": {
+            "description": "A boolean flag you can use to enable or disable a filter. This value is set to `true` by default. \n",
+            "x-description": "A boolean flag you can use to enable or disable a filter. This value is set to `true` by default.\n",
+            "type": "boolean",
+            "nullable": true,
+            "example": true
+          }
+        }
+      }
+    },
+    "responses": {
+      "POSTError400InvalidRequest": {
+        "description": "In response to a POST request containing invalid parameters, request bodies, or both, the API returns HTTP response code 400 and an error message that describes the exact problem.\n",
+        "x-description": "In response to a POST request containing invalid parameters, request bodies, or both, the API returns HTTP response code 400 and an error message that describes the exact problem.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "title": "HTTP response code",
+                  "description": "HTTP response code 400\n",
+                  "x-description": "HTTP response code returned by the API. Always `400`\n",
+                  "type": "integer",
+                  "format": "int64",
+                  "example": 400
+                },
+                "message": {
+                  "title": "Error message associated with HTTP response code 400",
+                  "description": "Error message\n",
+                  "x-description": "Descriptive message returned by the API.\n\nExpected values:\n\n* `Do not send filterId while creating a filter.`\n  The request included a value for `filterId`, but this is not a user-set value. Splunk APM automatically generates the `filterId` for each filter. \n* `matcher is required`\n  The request failed to include the required `matcher` field.\n* `matcher must include sf_service`\n  The `matcher` object does not contain the required `sf_service` field. \n* `matcher must include sf_operation`\n  The `matcher` object does not contain the required `sf_operation` field. \n* `visibleTags must include sf_environment, sf_endpoint, sf_error, sf_httpMethod, sf_kind, sf_operation, sf_workflow`\n* `Cannot have more than 1000 filters.`\n  The request would have exceeded the organization limit of 1000 filters. \n* `description is required`\n  The request did not contain the required `description` field. \n* `description must not be longer than 256 characters`\n  The filter description is longer than the 256-character limit. \n* `startTime must be before endTime`\n  The request included an `startTime` that falls after the included `endTime`.\n* `same tag present in visibleTags and hiddenTags`\n  The request contained the same tag name in the lists under the `visibleTags` and `hiddenTags` fields. A tag may only appear in one or the other.\n* `Unable to parse startTime=2021-06-14T00:00: Text '2021-06-14T00:00' could not be parsed at index 16`\n  The format of `startTime` is invalid.\n* `Unable to parse endTime=2021-06-30T00:00:0: Text '2021-06-30T00:00:0' could not be parsed at index 16`\n  The format of `endTime` is invalid.\n",
+                  "type": "string",
+                  "enum": [
+                    "Do not send `filterId` while creating a `filter`.",
+                    "`matcher` is required",
+                    "`matcher` must include `sf_service`",
+                    "`matcher` must include `sf_operation`",
+                    "visibleTags must include `sf_environment`, `sf_endpoint`, `sf_error`, `sf_httpMethod`, `sf_kind`, `sf_operation`, `sf_workflow`",
+                    "Cannot have more than 1000 filters.",
+                    "description is required",
+                    "description must not be longer than 256 characters",
+                    "startTime must be before endTime",
+                    "same tag present in visibleTags and hiddenTags",
+                    "Unable to parse startTime=2021-06-14T00:00: Text '2021-06-14T00:00' could not be parsed at index 16",
+                    "Unable to parse endTime=2021-06-30T00:00:0: Text '2021-06-30T00:00:0' could not be parsed at index 16"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "GETError400InvalidRequest": {
+        "description": "In response to a GET request containing invalid parameters, request bodies, or both, the API returns HTTP response code 400 and an error message that describes the exact problem.\n",
+        "x-description": "In response to a GET request containing invalid parameters, request bodies, or both, the API returns HTTP response code 400 and an error message that describes the exact problem.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "title": "HTTP response code",
+                  "description": "HTTP response code 400\n",
+                  "x-description": "HTTP response code returned by the API. Always `400`.\n",
+                  "type": "integer",
+                  "format": "int64",
+                  "example": 400
+                },
+                "message": {
+                  "title": "Error message associated with HTTP response code 400\n",
+                  "description": "Error message\n",
+                  "x-description": "Descriptive message returned by the API.\n \n Expected values:\n \n * `limit is required`\n   The query is missing the `limit` parameter.\n * `limit can't be larger than 1000`\n   The `limit` parameter must be smaller than or equal to 1000.\n * `limit can't be negative`\n   The `limit` parameter must be a positive number.\n * `offset can't be negative`\n   The `offset` parameter must be a positive number. \n",
+                  "type": "string",
+                  "enum": [
+                    "limit is required",
+                    "limit can't be larger than 1000",
+                    "limit can't be negative",
+                    "offset can't be negative"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

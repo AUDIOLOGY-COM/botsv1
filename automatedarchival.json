@@ -1,0 +1,724 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "2.0",
+    "title": "Automated archival",
+    "description": "API for automated archival.\n",
+    "x-description": "Pipeline automation rules determine which metrics Splunk will automatically archive.\n\n## Requirements\n\n* You must have an organization access token with the API permission or a session token to use the API.\n* You must have the Splunk Observability Cloud admin role to use the `POST /v2/automated-archival/settings` and `PUT /v2/automated-archival/settings` endpoints.\n* You must have the Splunk Observability Cloud power role to use the `GET /v2/automated-archival/settings` endpoint.\n"
+  },
+  "servers": [
+    {
+      "url": "https://api.{REALM}.observability.splunkcloud.com/v2",
+      "description": "Endpoint URL for automated archiving API\n",
+      "x-description": "Splunk Observability Cloud API endpoint\n\nReplace `{REALM}` with the name of your realm.\n\nFor example, if your realm is `eu0`, use `https://api.eu0.observability.splunkcloud.com/v2`.\n\nTo find your realm, go to your profile page in the the user interface.\n\nIf you don't include a realm and use `https://api.observability.splunkcloud.com/v2`,\nthe API interprets the endpoint as pointing to the `us0` realm.\n"
+    }
+  ],
+  "paths": {
+    "/automated-archival/settings": {
+      "get": {
+        "tags": [
+          "Create Current Configuration"
+        ],
+        "summary": "Retrieves the current configuration of the pipeline automation rule associated with your org.\n",
+        "description": "Retrieves the current configuration of the pipeline automation rule associated with your org.",
+        "x-description": "Retrieves the current configuration of the pipeline automation rule associated with your org.\n",
+        "operationId": "createCurrentConfig",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token.\n",
+            "x-description": "Authentication token. If you use an org token, it needs to have an authorization scope that includes `API`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the response body. Always `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved pipeline automation settings successfully.",
+            "x-description": "The API successfully found pipeline automation settings for your org.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Failed to retrieve pipeline automation rule.",
+            "x-description": "Request failed because a field is missing from the request body or a field contains an incorrect value.\nThe response body contains the HTTP response code and a user-readable error.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "x-description": "Unauthorized. The ingest token specified in the X-SF-TOKEN header\nin the request doesn't have authorization to retrieve a pipeline automation rule.\n"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Create New Configuration"
+        ],
+        "summary": "Creates a new configuration for the pipeline automation rule associated with your org.",
+        "description": "Creates a new configuration for the pipeline automation rule associated with your org.",
+        "x-description": "Creates a new configuration for the pipeline automation rule associated with your org.\n",
+        "operationId": "createNewConfig",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token\n",
+            "x-description": "Authentication token. If you use an org token, it needs to have an authorization scope that includes `API`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the response body. Always `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Request body format. Always `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "Properties for the new pipleine automation rule.\n",
+          "x-description": "A JSON object that contains the values for this ruleset\n",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePipelineAutomationRuleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated pipeline automation settings successfully.",
+            "x-description": "The API successfully updated the pipeline automation rule configuration for your org.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Failed to update pipeline automation rule.",
+            "x-description": "Request failed because a field is missing from the request body or a field contains an incorrect value.\nThe response body contains the HTTP response code and a user-readable error.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "x-description": "Unauthorized. The ingest token specified in the X-SF-TOKEN header\nin the request doesn't have authorization to retrieve a pipeline automation rule.\n"
+          }
+        }
+      }
+    },
+    "/automated-archival/exempt-metrics": {
+      "get": {
+        "tags": [
+          "Retrieve Exempt Metrics"
+        ],
+        "summary": "Endpoint for retrieving exempt metrics from a pipeline automation rule.",
+        "description": "Endpoint for retrieving exempt metrics from a pipeline automation rule.",
+        "x-description": "Shows all of the exempt metrics for the current version of your org's pipeline automation rule.\n",
+        "operationId": "retrieveExemptMetrics",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token\n",
+            "x-description": "Authentication token. If you use an org token, it needs to have an authorization scope that includes `API`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the response body. Always `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully found exempt metrics to the current version of the pipeline automation rule.",
+            "x-description": "The API successfully found exempt metrics from the current version of the pipeline automation rule.\n\nThe response body displays each exempt metric in the current pipeline automation rule in the form of an array of JSON objects.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": [
+                    {
+                      "creator": "creator",
+                      "lastUpdatedBy": "updatedBy",
+                      "created": 1743440733169,
+                      "lastUpdated": 1743440733169,
+                      "id": "unique_id",
+                      "orgId": "orgId",
+                      "name": "exempt.metric.1"
+                    },
+                    {
+                      "creator": "creator",
+                      "lastUpdatedBy": "updatedBy",
+                      "created": 1743440733169,
+                      "lastUpdated": 1743440733169,
+                      "id": "unique_id",
+                      "orgId": "orgId",
+                      "name": "exempt.metric.2"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Failed to add exempt metrics to the pipeline automation rule.",
+            "x-description": "Request failed because a field is missing from the request body or a field contains an incorrect value.\nThe response body contains the HTTP response code and a user-readable error.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "x-description": "Unauthorized. The ingest token specified in the X-SF-TOKEN header\nin the request doesn't have authorization to retrieve a pipeline automation rule.\n"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Add Exempt Metrics"
+        ],
+        "summary": "Endpoint for adding exempt metrics to a pipeline automation rule.",
+        "description": "Endpoint for adding exempt metrics to a pipeline automation rule.",
+        "x-description": "Adds a list of exempt metrics to the current version of the pipeline automation rule. \n",
+        "operationId": "addExemptMetrics",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token\n",
+            "x-description": "Authentication token. If you use an org token, it needs to have an authorization scope that includes `API`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the response body. Always `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Request body format. Always `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "Request body for adding exempt metrics.",
+          "x-description": "The list of exempt metrics to add to the pipeline automation rule.\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMetricsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully added exempt metrics to the current version of the pipeline automation rule.",
+            "x-description": "The API successfully added exempt metrics to the current version of the pipeline automation rule.\n\nThe response body displays each exempt metric in the current pipeline automation rule in the form of an array of JSON objects.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": [
+                    {
+                      "creator": "creator",
+                      "lastUpdatedBy": "updatedBy",
+                      "created": 1743440733169,
+                      "lastUpdated": 1743440733169,
+                      "id": "unique_id",
+                      "orgId": "orgId",
+                      "name": "exempt.metric.1"
+                    },
+                    {
+                      "creator": "creator",
+                      "lastUpdatedBy": "updatedBy",
+                      "created": 1743440733169,
+                      "lastUpdated": 1743440733169,
+                      "id": "unique_id",
+                      "orgId": "orgId",
+                      "name": "exempt.metric.2"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Failed to add exempt metrics to the pipeline automation rule.",
+            "x-description": "Request failed because a field is missing from the request body or a field contains an incorrect value.\nThe response body contains the HTTP response code and a user-readable error.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "x-description": "Unauthorized. The ingest token specified in the X-SF-TOKEN header\nin the request doesn't have authorization to retrieve a pipeline automation rule.\n"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Remove Exempt Metrics"
+        ],
+        "summary": "Endpoint for removing exempt metrics from a pipeline automation rule.",
+        "description": "Endpoint for removing exempt metrics from a pipeline automation rule.",
+        "x-description": "Removes exempt metrics from the current version of the pipeline automation rule. \n",
+        "operationId": "removeExemptMetrics",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token\n",
+            "x-description": "Authentication token. If you use an org token, it needs to have an authorization scope that includes `API`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Format of the response body. Always `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "`\"application/json\"`\n",
+            "x-description": "Request body format. Always `\"application/json\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "description": "Request body for removing exempt metrics.",
+          "x-description": "The list of exempt metrics to remove from the pipeline automation rule.\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveMetricsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully removed exempt metrics to the current version of the pipeline automation rule.",
+            "x-description": "The API successfully removed exempt metrics from the current version of the pipeline automation rule.\n"
+          },
+          "400": {
+            "description": "Failed to delete exempt metrics from the pipeline automation rule.",
+            "x-description": "Request failed because a field is missing from the request body or a field contains an incorrect value.\nThe response body contains the HTTP response code and a user-readable error.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "x-description": "Unauthorized. The ingest token specified in the X-SF-TOKEN header\nin the request doesn't have authorization to retrieve a pipeline automation rule.\n"
+          }
+        }
+      }
+    },
+    "/automated-archival/preview": {
+      "get": {
+        "tags": [
+          "Preview Metric Usage"
+        ],
+        "summary": "Endpoint for previewing metric usage.",
+        "description": "Endpoint for previewing metric usage.",
+        "x-description": "Shows a preview of your current metric usage, formatted as an octet stream. \n\nPreviewing metric usage doesn't create pipeline automation rules.\n",
+        "operationId": "previewMetricUsage",
+        "parameters": [
+          {
+            "name": "X-SF-TOKEN",
+            "in": "header",
+            "description": "Authentication token\n",
+            "x-description": "Authentication token. If you use an org token, it needs to have an authorization scope that includes `API`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "`\"application/octet-stream\"`\n",
+            "x-description": "Format of the response body. Always `\"application/octet-stream\"`.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "lookbackPeriod",
+            "in": "query",
+            "description": "Lookback period.",
+            "x-description": "The lookback period, formatted as \"PXXD\", where the \"XX\" is replaced by the number of days to look back (maximum 60).\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "P30D"
+          },
+          {
+            "name": "gracePeriod",
+            "in": "query",
+            "description": "Grace period.",
+            "x-description": "The grace period for the preview, formatted as \"PXXD\", where the \"XX\" is replaced by the number of grace period days (maximum 60).\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "P30D"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created an automated archival preview.",
+            "x-description": "The API successfully created an automated archival preview. The API displays this preview as an octet stream.\n"
+          },
+          "400": {
+            "description": "Failed to preview metrics.",
+            "x-description": "Request failed because a field is missing from the request body or a field contains an incorrect value.\nThe response body contains the HTTP response code and a user-readable error.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "x-description": "Unauthorized. The ingest token specified in the X-SF-TOKEN header\nin the request doesn't have authorization to retrieve a pipeline automation rule.\n"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Creator": {
+        "title": "Creator ID.",
+        "description": "Creator ID.",
+        "x-description": "ID of the user who created this pipeline automation rule.\n",
+        "type": "string",
+        "example": "creatorID"
+      },
+      "LastUpdatedBy": {
+        "title": "Updator ID.",
+        "description": "Updator ID.",
+        "x-description": "ID of the user who most recently updated the pipeline automation rule.\n",
+        "type": "string",
+        "example": "updatorID"
+      },
+      "Created": {
+        "title": "Pipeline automation rule creation time.",
+        "description": "Pipeline automation rule creation time.",
+        "x-description": "The pipeline automation rule creation time, in *nix time in milliseconds. \n\nThe system sets this value, and you can't modify it.\n",
+        "type": "integer",
+        "format": "int64",
+        "example": 1741967107063,
+        "readOnly": true
+      },
+      "OrgId": {
+        "title": "Org ID.",
+        "description": "Org ID.",
+        "x-description": "ID of the organization associated with this pipeline automation rule. \n",
+        "type": "string",
+        "example": "myOrg"
+      },
+      "Version": {
+        "title": "Version of the pipeline automation rule.",
+        "description": "Pipeline automation rule version.",
+        "x-description": "Version number of the pipeline automation rule. \n\nIf you're updating or creating a pipeline automation rule, you must include the version number of the current configuration in your request. You can find the current version number by using `GET /v2/automated-archival/settings`.\n",
+        "type": "integer",
+        "format": "int32",
+        "example": 31
+      },
+      "LastUpdated": {
+        "title": "Pipeline automation rule most recent update time.",
+        "description": "Pipeline automation rule most recent update time.",
+        "x-description": "Time at which the pipeline automation rule was most recently updated, in *nix time in milliseconds.\n\nThe system sets this value, and you can't modify it.\n",
+        "type": "integer",
+        "format": "int64",
+        "example": 1743206281680,
+        "readOnly": true
+      },
+      "Enabled": {
+        "title": "Enabled/disabled.",
+        "description": "Indicates whether the pipeline automation rule is active.",
+        "x-description": "Indicates whether the pipeline automation rule is currently active. If `false`, the rule is inactive.\n",
+        "type": "boolean",
+        "example": true
+      },
+      "LookbackPeriod": {
+        "title": "Lookback period for the rule.",
+        "description": "Lookback period for the rule.",
+        "x-description": "The look back period for the pipeline automation rule. This is the time period for which the API will look for unused metrics to archive.\n    \nFor example, a `lookbackPeriod` value of \"P30D\", denoting 30 days, tells the API to look for metrics from the previous 30 days. The look back period must be between 0 and 60 days.\n",
+        "type": "string",
+        "example": "P60D"
+      },
+      "GracePeriod": {
+        "title": "Grace period for the rule.",
+        "description": "Grace period for the rule.",
+        "x-description": "The grace period for this pipeline automation rule. After the grace period ends, new metrics that have been unused during the grace period will be archived.\n\nFor example, a `gracePeriod` value of \"P30D\", denoting 30 days, means that a new metric can be unused for up to 30 days before being automatically archived. The grace period must be between 0 and 60 days.\n",
+        "type": "string",
+        "example": "P60D"
+      },
+      "RulesetLimit": {
+        "title": "Maximum number of rulesets.",
+        "description": "Maximum number of rulesets.",
+        "x-description": "The maximum number of rulesets for this pipeline automation rule.\n",
+        "type": "integer",
+        "format": "int32",
+        "example": 500
+      },
+      "Pipeline": {
+        "title": "Properties of pipeline automation settings",
+        "description": "Properties of pipeline automation settings.",
+        "x-description": "Properties of pipeline automation settings, in the form of a JSON object.\n",
+        "properties": {
+          "creator": {
+            "$ref": "#/components/schemas/Creator"
+          },
+          "created": {
+            "$ref": "#/components/schemas/Created"
+          },
+          "lastUpdated": {
+            "$ref": "#/components/schemas/LastUpdated"
+          },
+          "lastUpdatedBy": {
+            "$ref": "#/components/schemas/LastUpdatedBy"
+          },
+          "enabled": {
+            "$ref": "#/components/schemas/Enabled"
+          },
+          "version": {
+            "$ref": "#/components/schemas/Version"
+          },
+          "orgId": {
+            "$ref": "#/components/schemas/OrgId"
+          },
+          "rulesetLimit": {
+            "$ref": "#/components/schemas/RulesetLimit"
+          },
+          "gracePeriod": {
+            "$ref": "#/components/schemas/GracePeriod"
+          },
+          "lookbackPeriod": {
+            "$ref": "#/components/schemas/LookbackPeriod"
+          }
+        }
+      },
+      "RequestError": {
+        "title": "Response body returned for an invalid request",
+        "description": "Response error code and message\n",
+        "x-description": "Response error code and message, in the form of a JSON object\n",
+        "type": "object",
+        "properties": {
+          "code": {
+            "title": "Error code",
+            "description": "HTTP response code\n",
+            "x-description": "HTTP response code for the error\n",
+            "type": "integer",
+            "example": 400
+          },
+          "message": {
+            "title": "Error message",
+            "description": "Error message\n",
+            "x-description": "Cause of the error. The following list describes the error message and its cause:\n\n  * `Please provide a name for this token.`: In the request body, the `name` field is missing or `null`.\n  * `Unable to create or update the given token. Please try again later.`: An internal error occurred, and Splunk Observability Cloud can't create the token. \n  * `A token with the same name already exists!`: For a `POST` request, you specified a value for `name` that's the same as the name of an existing token. \n  * `DPM quota cannot be set on a Hosts subscription plan`: Your organization uses host-based pricing, but you tried to set a DPM limit.\n  * `Category quota cannot be set on a DPM subscription plan`: Your organization uses DPM-based pricing, but you tried to set a host-based limit. \n  * `Host/Container quota cannot be set on a MTS subscription plan`: Your organization uses custom metric-based pricing, but you tried\n    to set a host or container limit.\n  * `A principalId is required and may not be empty for acl entry`: Problem with a field in `permissions` -- `principalId` is either missing or empty.\n  * `One or more of provided users could not be validated [<principal_id_value]`: Problem with a field in `permissions` -- The value of `principalId` \n    isn't an existing user, team, or org ID.\n  * `Permissions are required with one (and only one) of permission types present. Either provide custom ACL for this object or PARENT ID from which permissions should be inherited.`\n    Problem with a field in `permissions` -- The value of `acl` is `null`.\n  * `Actions are required and may not be empty for acl entry`: Problem with a field in `permissions` -- The value of `actions` in `acl` is `null`.\n  * `A principalType is required and may not be empty for acl entry`: Problem with a field in `permissions` -- `principalType` is either missing or empty.\n  * `Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\\\"permissions\\\"]->sf.domain.accesscontrol.ObjectPermissions[\\\"acl\\\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\\\"actions\\\"]->java.util.HashSet[0]`:\n    Problem with a field in `permissions` -- The value of the `actions` field isn't `READ` or `WRITE`.\n  * `Failed to deserialize payload at: sf.rest.shared.model.NamedToken[\\\"permissions\\\"]->sf.domain.accesscontrol.ObjectPermissions[\\\"acl\\\"]->java.util.HashSet[0]->sf.domain.accesscontrol.AclEntry[\\\"principalType\\\"]`\n    Problem with a field in `permissions` -- The value of the `principalType` field isn't `USER`, `TEAM`, or `ORG`.\n",
+            "type": "string"
+          }
+        }
+      },
+      "CreatePipelineAutomationRuleRequest": {
+        "title": "Create pipeline automation rule response body.",
+        "description": "Create pipeline automation rule response body.",
+        "x-description": "Request body that updates a pipeline automation rule.\n",
+        "properties": {
+          "enabled": {
+            "$ref": "#/components/schemas/Enabled"
+          },
+          "version": {
+            "$ref": "#/components/schemas/Version"
+          },
+          "orgId": {
+            "$ref": "#/components/schemas/OrgId"
+          },
+          "rulesetLimit": {
+            "$ref": "#/components/schemas/RulesetLimit"
+          },
+          "gracePeriod": {
+            "$ref": "#/components/schemas/GracePeriod"
+          },
+          "lookbackPeriod": {
+            "$ref": "#/components/schemas/LookbackPeriod"
+          }
+        }
+      },
+      "ExemptMetricIdList": {
+        "title": "List of exempt metric IDs",
+        "description": "List of exempt metric IDs",
+        "x-description": "List of the IDs of exempt metrics to remove from the pipeline automation rule, in the form of a JSON array. Each element is a string specifying a metric ID. \n",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExemptMetricId"
+        },
+        "example": [
+          "GtCBQ9rAAAA",
+          "Gy4HsKAAEKg"
+        ]
+      },
+      "ExemptMetricName": {
+        "title": "A metric name.",
+        "description": "A metric name.",
+        "x-description": "A JSON object containing a key-value pair that defines an exempt metric name.\n",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of an exempt metric\n",
+            "x-description": "Name of an exempt metric\n",
+            "example": "exempt.metric.1"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "example": {
+          "name": "exempt.metric.1"
+        }
+      },
+      "ExemptMetricId": {
+        "title": "A metric ID.",
+        "description": "A metric ID.",
+        "x-description": "ID of the exempt metric.\n",
+        "type": "string",
+        "example": "GtCBQ9rAAAA"
+      },
+      "RemoveMetricsRequest": {
+        "title": "Properties for removing exempt metrics",
+        "description": "Remove exempt metrics from the pipeline automation rule. \n",
+        "x-description": "Properties to use in removing exempt metrics from the pipeline automation rule using the API.\n",
+        "type": "object",
+        "required": [
+          "ids"
+        ],
+        "properties": {
+          "ids": {
+            "$ref": "#/components/schemas/ExemptMetricIdList"
+          }
+        }
+      },
+      "AddMetricsRequest": {
+        "title": "List of exempt metrics to add",
+        "description": "List of exempt metrics to add to the pipeline automation rule. \n",
+        "x-description": "List of the exempt metrics to add to the pipeline automation rule, in the form of a JSON array. Each element is a JSON object containing a key-value pair that defines an exempt metric name.\n",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExemptMetricName"
+        },
+        "example": [
+          {
+            "name": "exempt.metric.1"
+          },
+          {
+            "name": "exempt.metric.2"
+          }
+        ]
+      }
+    }
+  }
+}
